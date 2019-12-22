@@ -1,7 +1,7 @@
 #!/usr/bin/python2.7
 #Author by Muhammad Rendy Iswardi
 #CodeName: Sterben404
-#09 Desember 2019
+#22 Desember 2019
 
 import os,re,time,sys
 import requests
