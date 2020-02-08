@@ -7,7 +7,9 @@ import os,re,time,sys
 import requests
 import urllib2
 import ssl
-import threading
+from multiprocessing import Pool
+from multiprocessing.dummy import Pool as ThreadPool
+
 
 red = '\033[31m'
 green = '\033[32m'
@@ -22,52 +24,56 @@ else:
 	os.system('clear')
 pass
 #runningText
-def write(s):
-	for c in s + '\n':
-		sys.stdout.write(c)
-		sys.stdout.flush()
-		time.sleep(0.00100)
+
 #Banner
 print(green+"   ______       ____  _______           __          ")
 print("  / __/ /  ___ / / / / ___/ /  ___ ____/ /_____ ___ ")
 print(" _\ \/ _ \/ -_) / / / /__/ _ \/ -_) __/  '_/ -_) __/")
 print("/___/_//_/\__/_/_/  \___/_//_/\__/\__/_/\_\\__/_/   ")
-write(blue+"Author by Sterben404 - Moch Rendy"+yellow)
+print(blue+"Author by Sterben404 - Moch Rendy"+yellow)
 print(red+'( For List Shell use http:// )')
 
-#Main
-def main(open_shell):
-	for show in open_shell:
+def error():
+	try:
+		requests.post('http://www.google.com')
+		open(sys.argv[1], 'rb')
+	except requests.exceptions.ConnectionError:
+		print(red+"[ - ]"+reset+" Tidak Ada Koneksi Internet")
+		exit()
+	except IOError:
+		print(red+"[ - ]"+reset+" File Tidak Di Temukan!")
+		exit()
+	except IndexError:
+		print(red+"[ - ]"+reset+" Usage : python2 file.py list.txt")
+		exit()
+error()
+
+def main(url):
 		try:
 			header = {'Content-Type' : 'text/html; charset=UTF-8','User-Agent':''}
-			req = urllib2.Request(show, headers=header)
-			r = urllib2.urlopen(req, context=ssl._create_unverified_context())
-			r.code
-			print(green+"[ LIVE ] "+reset+show)
-			with open('live.txt','a') as live:
-				live.write(show+'\n')
-				live.close()
+			r = urllib2.urlopen(url, context=ssl._create_unverified_context())
+			if r.code == 200:
+				print(green+"[ LIVE ] "+reset+url)
+				with open('live.txt','a') as live:
+					live.write(url+'\n')
+					live.close()
+			pass
 		except:
-			print(red+"[ DIE  ] "+reset+show)
+			print(red+"[ DIE  ] "+reset+url)
 			with open('die.txt', 'a') as die:
-				die.write(show+'\n')
+				die.write(url+'\n')
 				die.close()
 			pass
 
-def cekfile():
-	try:
-		open(shell, 'r')
-	except IOError as e:
-		write(red+'[ ! ]%s File Not Found!' % reset)
-		exit()
-	pass
 
 #Input
-write(yellow+"LIVE Shell : %s live.txt" % green)
-write(yellow+"DIE Shell  : %s die.txt" % red+reset)
+
+target	= [i for i in open(sys.argv[1]).read().split("\n") if i != ""]
+t = ThreadPool(10)
+t.map(main, target)
+
+
+
 if __name__ == "__main__":
-	shell = raw_input('List Shell :  '+blue)
-	cekfile()
-	target	= [i for i in open(shell).read().split("\n") if i != ""]
-	t = threading.Thread(target=main, args=(target, ))
-	t.start()
+	print(yellow+"LIVE Shell : %s live.txt" % green)
+	print(yellow+"DIE Shell  : %s die.txt" % red+reset)
